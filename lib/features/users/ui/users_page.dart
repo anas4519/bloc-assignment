@@ -1,3 +1,5 @@
+import 'package:bloc_assignment/features/theme/bloc/theme_bloc.dart';
+import 'package:bloc_assignment/features/user%20details/ui/user_details.dart';
 import 'package:bloc_assignment/features/users/bloc/users_bloc.dart';
 import 'package:bloc_assignment/features/users/models/users_data_ui_model.dart';
 import 'package:flutter/material.dart';
@@ -25,21 +27,38 @@ class _UsersPageState extends State<UsersPage> {
   void dispose() {
     _searchController.dispose();
     usersBloc.close();
-    super.dispose();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        title: const Text(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(
           'Users',
           style: TextStyle(
             fontWeight: FontWeight.w600,
             fontSize: 20,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
+        actions: [
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return IconButton(
+                icon: Icon(
+                  state.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                onPressed: () {
+                  context.read<ThemeBloc>().add(ToggleTheme());
+                },
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -50,20 +69,15 @@ class _UsersPageState extends State<UsersPage> {
               style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
                 hintText: 'Search users...',
-                hintStyle: TextStyle(
-                  color: Colors.grey[500],
-                  fontSize: 16,
-                ),
-                prefixIcon: Icon(
+                hintStyle: const TextStyle(fontSize: 16),
+                prefixIcon: const Icon(
                   Icons.search_rounded,
-                  color: Colors.grey[600],
                   size: 22,
                 ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.clear_rounded,
-                      
                           size: 20,
                         ),
                         onPressed: () {
@@ -72,11 +86,8 @@ class _UsersPageState extends State<UsersPage> {
                         },
                       )
                     : null,
-                
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(
@@ -119,14 +130,20 @@ class _UsersPageState extends State<UsersPage> {
                           Icon(
                             Icons.error_outline_rounded,
                             size: 64,
-                            color: Colors.grey[400],
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.6),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'Failed to load users',
                             style: TextStyle(
                               fontSize: 18,
-                              color: Colors.grey[600],
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.8),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -135,7 +152,10 @@ class _UsersPageState extends State<UsersPage> {
                             'Please try again later',
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[500],
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withOpacity(0.6),
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -183,14 +203,14 @@ class _UsersPageState extends State<UsersPage> {
             Icon(
               Icons.people_outline_rounded,
               size: 64,
-              color: Colors.grey[400],
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
             ),
             const SizedBox(height: 16),
             Text(
               'No users found',
               style: TextStyle(
                 fontSize: 18,
-                color: Colors.grey[600],
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -199,7 +219,7 @@ class _UsersPageState extends State<UsersPage> {
               'Try adjusting your search criteria',
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey[500],
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -221,7 +241,10 @@ class _UsersPageState extends State<UsersPage> {
                   child: Text(
                     'No more users to load',
                     style: TextStyle(
-                      color: Colors.grey[500],
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
                       fontSize: 14,
                     ),
                   ),
@@ -249,15 +272,15 @@ class _UsersPageState extends State<UsersPage> {
 
         final user = users[index];
         String fullName = '${user.firstName} ${user.lastName}';
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Theme.of(context).shadowColor.withOpacity(0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -270,10 +293,10 @@ class _UsersPageState extends State<UsersPage> {
             ),
             title: Text(
               fullName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
-                color: Colors.black87,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             subtitle: Padding(
@@ -281,7 +304,8 @@ class _UsersPageState extends State<UsersPage> {
               child: Text(
                 user.email,
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   fontSize: 14,
                 ),
               ),
@@ -291,7 +315,7 @@ class _UsersPageState extends State<UsersPage> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Theme.of(context).shadowColor.withOpacity(0.2),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -299,7 +323,7 @@ class _UsersPageState extends State<UsersPage> {
               ),
               child: CircleAvatar(
                 radius: 24,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
                 child: ClipOval(
                   child: CachedNetworkImage(
                     imageUrl: user.image,
@@ -309,20 +333,20 @@ class _UsersPageState extends State<UsersPage> {
                     placeholder: (context, url) => Container(
                       width: 48,
                       height: 48,
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       child: Icon(
                         Icons.person_rounded,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 24,
                       ),
                     ),
                     errorWidget: (context, url, error) => Container(
                       width: 48,
                       height: 48,
-                      color: Colors.grey[200],
+                      color: Theme.of(context).colorScheme.surfaceVariant,
                       child: Icon(
                         Icons.person_rounded,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         size: 24,
                       ),
                     ),
@@ -332,12 +356,16 @@ class _UsersPageState extends State<UsersPage> {
             ),
             trailing: Icon(
               Icons.chevron_right_rounded,
-              color: Colors.grey[400],
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
               size: 20,
             ),
             onTap: () {
-              // Handle user tap - navigate to user details
-              // Navigator.push(context, MaterialPageRoute(builder: (_) => UserDetailsPage(user: user)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => UserDetails(user: user),
+                ),
+              );
             },
           ),
         );
