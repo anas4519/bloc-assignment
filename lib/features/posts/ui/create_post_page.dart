@@ -1,4 +1,3 @@
-// lib/features/posts/ui/create_post_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/posts_bloc.dart';

@@ -1,3 +1,4 @@
+import 'package:bloc_assignment/features/user%20details/repos/user_details_repo.dart';
 import 'package:bloc_assignment/features/user%20details/ui/posts_lists.dart';
 import 'package:bloc_assignment/features/user%20details/ui/todos_list.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,7 @@ class _UserDetailsState extends State<UserDetails> {
   @override
   void initState() {
     super.initState();
-    _userDetailsBloc = UserDetailsBloc();
+    _userDetailsBloc = UserDetailsBloc(repository: UserDetailsRepository());
     _userDetailsBloc.add(FetchUserDetails(userId: widget.user.id));
   }
 

@@ -1,15 +1,16 @@
-import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import 'package:http/http.dart' as http;
 import '../models/post_model.dart';
 import '../models/todo_model.dart';
+import '../repos/user_details_repo.dart';
 
 part 'user_details_event.dart';
 part 'user_details_state.dart';
 
 class UserDetailsBloc extends Bloc<UserDetailsEvent, UserDetailsState> {
-  UserDetailsBloc() : super(UserDetailsInitial()) {
+  final UserDetailsRepository repository;
+
+  UserDetailsBloc({required this.repository}) : super(UserDetailsInitial()) {
     on<FetchUserDetails>(_handleFetchUserDetails);
   }
 
@@ -20,28 +21,8 @@ class UserDetailsBloc extends Bloc<UserDetailsEvent, UserDetailsState> {
     emit(UserDetailsLoading());
 
     try {
-      final postsResponse = await http.get(
-        Uri.parse('https://dummyjson.com/posts/user/${event.userId}'),
-      );
-      final todosResponse = await http.get(
-        Uri.parse('https://dummyjson.com/todos/user/${event.userId}'),
-      );
-
-      if (postsResponse.statusCode == 200 && todosResponse.statusCode == 200) {
-        final postsJson = json.decode(postsResponse.body);
-        final todosJson = json.decode(todosResponse.body);
-
-        final posts = (postsJson['posts'] as List)
-            .map((post) => Post.fromJson(post))
-            .toList();
-        final todos = (todosJson['todos'] as List)
-            .map((todo) => Todo.fromJson(todo))
-            .toList();
-
-        emit(UserDetailsLoaded(posts: posts, todos: todos));
-      } else {
-        emit(UserDetailsError(message: 'Failed to fetch user details'));
-      }
+      final (posts, todos) = await repository.getUserDetails(event.userId);
+      emit(UserDetailsLoaded(posts: posts, todos: todos));
     } catch (e) {
       emit(UserDetailsError(message: e.toString()));
     }

@@ -1,5 +1,6 @@
 import 'package:bloc_assignment/features/home/home_page.dart';
 import 'package:bloc_assignment/features/posts/bloc/posts_bloc.dart';
+import 'package:bloc_assignment/features/posts/repos/posts_repo.dart';
 import 'package:bloc_assignment/features/theme/bloc/theme_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -79,7 +80,7 @@ class MyApp extends StatelessWidget {
           create: (context) => ThemeBloc(prefs: prefs)..add(InitializeTheme()),
         ),
         BlocProvider(
-          create: (context) => PostsBloc(),
+          create: (context) => PostsBloc(repository: PostsRepository()),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(

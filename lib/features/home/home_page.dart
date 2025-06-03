@@ -14,7 +14,7 @@ class _HomePageState extends State<HomePage> {
 
   final pages = [
     UsersPage(),
-    PostsPage(), // Your new local posts list
+    PostsPage(),
   ];
 
   @override
