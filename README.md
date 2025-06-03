@@ -2,8 +2,6 @@
 
 A Flutter project demonstrating state management using BLoC pattern.
 
-[Demo Video](https://youtube.com/shorts/eA7oK6uFjps?feature=share)
-
 ## Project Overview
 
 This application showcases the implementation of BLoC (Business Logic Component) pattern in Flutter. It manages state effectively by separating the business logic from the UI components.
