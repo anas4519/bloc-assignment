@@ -2,6 +2,7 @@ import 'package:bloc_assignment/features/users/bloc/users_bloc.dart';
 import 'package:bloc_assignment/features/users/models/users_data_ui_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UsersPage extends StatefulWidget {
   const UsersPage({super.key});
@@ -30,29 +31,62 @@ class _UsersPageState extends State<UsersPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Users'),
+        title: const Text(
+          'Users',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(fontSize: 16),
               decoration: InputDecoration(
                 hintText: 'Search users...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: TextStyle(
+                  color: Colors.grey[500],
+                  fontSize: 16,
+                ),
+                prefixIcon: Icon(
+                  Icons.search_rounded,
+                  color: Colors.grey[600],
+                  size: 22,
+                ),
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: Icon(
+                          Icons.clear_rounded,
+                      
+                          size: 20,
+                        ),
                         onPressed: () {
                           _searchController.clear();
                           usersBloc.add(UsersClearSearchEvent());
                         },
                       )
                     : null,
+                
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
                 ),
               ),
               onChanged: (value) {
@@ -73,11 +107,55 @@ class _UsersPageState extends State<UsersPage> {
                 switch (state.runtimeType) {
                   case UsersFetchingLoadingState:
                     return const Center(
-                      child: CircularProgressIndicator(),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 3,
+                      ),
                     );
                   case UsersFetchingErrorState:
-                    return const Center(
-                      child: Text('Failed to load users'),
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline_rounded,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Failed to load users',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Please try again later',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[500],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          ElevatedButton(
+                            onPressed: () {
+                              usersBloc.add(UsersInitialFetch());
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
                     );
                   case UsersFetchingSuccessfulState:
                     final successState = state as UsersFetchingSuccessfulState;
@@ -98,28 +176,72 @@ class _UsersPageState extends State<UsersPage> {
 
   Widget _buildUsersList(List<User> users, UsersState state) {
     if (users.isEmpty) {
-      return const Center(
-        child: Text('No users found'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.people_outline_rounded,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No users found',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try adjusting your search criteria',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+              ),
+            ),
+          ],
+        ),
       );
     }
 
     return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: users.length + 1,
       itemBuilder: (context, index) {
         if (index == users.length) {
           if (state is UsersFetchingSuccessfulState) {
             final successState = state;
             if (successState.hasReachedMax) {
-              return const SizedBox();
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Center(
+                  child: Text(
+                    'No more users to load',
+                    style: TextStyle(
+                      color: Colors.grey[500],
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              );
             }
             if (successState.isLoadingMore) {
-              return const Center(
-                child: CircularProgressIndicator(),
+              return const Padding(
+                padding: EdgeInsets.all(16),
+                child: Center(
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                ),
               );
             }
             usersBloc.add(UsersLoadMore());
-            return const Center(
-              child: CircularProgressIndicator(),
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
             );
           }
           return const SizedBox();
@@ -127,13 +249,95 @@ class _UsersPageState extends State<UsersPage> {
 
         final user = users[index];
         String fullName = '${user.firstName} ${user.lastName}';
-        return ListTile(
-          title: Text(fullName),
-          subtitle: Text(user.email),
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(user.image),
-            onBackgroundImageError: (exception, stackTrace) {
-              // Handle image loading error
+        
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            title: Text(
+              fullName,
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+            subtitle: Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                user.email,
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            leading: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 24,
+                backgroundColor: Colors.grey[200],
+                child: ClipOval(
+                  child: CachedNetworkImage(
+                    imageUrl: user.image,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      width: 48,
+                      height: 48,
+                      color: Colors.grey[200],
+                      child: Icon(
+                        Icons.person_rounded,
+                        color: Colors.grey[400],
+                        size: 24,
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 48,
+                      height: 48,
+                      color: Colors.grey[200],
+                      child: Icon(
+                        Icons.person_rounded,
+                        color: Colors.grey[400],
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            trailing: Icon(
+              Icons.chevron_right_rounded,
+              color: Colors.grey[400],
+              size: 20,
+            ),
+            onTap: () {
+              // Handle user tap - navigate to user details
+              // Navigator.push(context, MaterialPageRoute(builder: (_) => UserDetailsPage(user: user)));
             },
           ),
         );
