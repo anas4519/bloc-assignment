@@ -27,7 +27,7 @@ class _UsersPageState extends State<UsersPage> {
   void dispose() {
     _searchController.dispose();
     usersBloc.close();
-    super.initState();
+    super.dispose();
   }
 
   @override
@@ -111,9 +111,7 @@ class _UsersPageState extends State<UsersPage> {
               bloc: usersBloc,
               listenWhen: (previous, current) => current is UsersActionState,
               buildWhen: (previous, current) => current is! UsersActionState,
-              listener: (context, state) {
-                // Handle action states if needed
-              },
+              listener: (context, state) {},
               builder: (context, state) {
                 switch (state.runtimeType) {
                   case UsersFetchingLoadingState:

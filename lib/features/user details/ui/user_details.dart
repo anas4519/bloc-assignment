@@ -1,9 +1,9 @@
+import 'package:bloc_assignment/features/user%20details/ui/posts_lists.dart';
+import 'package:bloc_assignment/features/user%20details/ui/todos_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc_assignment/features/users/models/users_data_ui_model.dart';
 import '../bloc/user_details_bloc.dart';
-import '../models/post_model.dart';
-import '../models/todo_model.dart';
 
 class UserDetails extends StatefulWidget {
   const UserDetails({super.key, required this.user});
@@ -59,9 +59,9 @@ class _UserDetailsState extends State<UserDetails> {
                     children: [
                       _buildUserInfo(),
                       const SizedBox(height: 24),
-                      _buildPostsList(state.posts),
+                      PostsLists(posts: state.posts),
                       const SizedBox(height: 24),
-                      _buildTodosList(state.todos),
+                      TodosList(todos: state.todos)
                     ],
                   ),
                 ),
@@ -98,7 +98,8 @@ class _UserDetailsState extends State<UserDetails> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                _buildInfoRow('Name', '${widget.user.firstName} ${widget.user.lastName}'),
+                _buildInfoRow(
+                    'Name', '${widget.user.firstName} ${widget.user.lastName}'),
                 _buildInfoRow('Username', widget.user.username),
                 _buildInfoRow('Email', widget.user.email),
                 _buildInfoRow('Phone', widget.user.phone),
@@ -109,7 +110,8 @@ class _UserDetailsState extends State<UserDetails> {
                 _buildInfoRow('Height', '${widget.user.height} cm'),
                 _buildInfoRow('Weight', '${widget.user.weight} kg'),
                 _buildInfoRow('Eye Color', widget.user.eyeColor),
-                _buildInfoRow('Hair', '${widget.user.hair.color} ${widget.user.hair.type}'),
+                _buildInfoRow('Hair',
+                    '${widget.user.hair.color} ${widget.user.hair.type}'),
                 const Divider(),
                 _buildInfoRow('University', widget.user.university),
                 const Divider(),
@@ -120,7 +122,8 @@ class _UserDetailsState extends State<UserDetails> {
                 const SizedBox(height: 8),
                 _buildInfoRow('Street', widget.user.address.address),
                 _buildInfoRow('City', widget.user.address.city),
-                _buildInfoRow('State', '${widget.user.address.state} (${widget.user.address.stateCode})'),
+                _buildInfoRow('State',
+                    '${widget.user.address.state} (${widget.user.address.stateCode})'),
                 _buildInfoRow('Country', widget.user.address.country),
                 _buildInfoRow('Postal Code', widget.user.address.postalCode),
                 const Divider(),
@@ -174,155 +177,6 @@ class _UserDetailsState extends State<UserDetails> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPostsList(List<Post> posts) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Posts',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (posts.isEmpty)
-          Center(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.article_outlined,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No posts to show',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: posts.length,
-            itemBuilder: (context, index) {
-              final post = posts[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        post.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(post.body),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        children: post.tags
-                            .map((tag) => Chip(label: Text(tag)))
-                            .toList(),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.thumb_up, size: 16),
-                          const SizedBox(width: 4),
-                          Text('${post.reactions['likes']}'),
-                          const SizedBox(width: 16),
-                          Icon(Icons.remove_red_eye, size: 16),
-                          const SizedBox(width: 4),
-                          Text('${post.views}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-      ],
-    );
-  }
-
-  Widget _buildTodosList(List<Todo> todos) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Todos',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 16),
-        if (todos.isEmpty)
-          Center(
-            child: Column(
-              children: [
-                Icon(
-                  Icons.check_circle_outline,
-                  size: 48,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'No todos to show',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  title: Text(
-                    todo.todo,
-                    style: TextStyle(
-                      decoration: todo.completed
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                  ),
-                  trailing: Icon(
-                    todo.completed
-                        ? Icons.check_circle
-                        : Icons.circle_outlined,
-                    color:
-                        todo.completed ? Colors.green : Colors.grey,
-                  ),
-                ),
-              );
-            },
-          ),
-      ],
     );
   }
 }

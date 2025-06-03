@@ -42,7 +42,7 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
     final currentState = state;
     if (currentState is UsersFetchingSuccessfulState) {
       if (currentState.hasReachedMax) return;
-      
+
       emit(UsersFetchingSuccessfulState(
         users: currentState.users,
         isLoadingMore: true,
@@ -55,7 +55,8 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
           limit: limit,
         );
         currentSkip += limit;
-        final updatedUsers = List<User>.from(currentState.users)..addAll(result.users);
+        final updatedUsers = List<User>.from(currentState.users)
+          ..addAll(result.users);
         emit(UsersFetchingSuccessfulState(
           users: updatedUsers,
           hasReachedMax: updatedUsers.length >= total,
@@ -71,20 +72,13 @@ class UsersBloc extends Bloc<UsersEvent, UsersState> {
 
   FutureOr<void> usersSearchEvent(
       UsersSearchEvent event, Emitter<UsersState> emit) async {
-    final query = event.searchQuery.toLowerCase();
-
-    if (query.isEmpty) {
-      emit(UsersFetchingSuccessfulState(users: allUsers));
-      return;
+    emit(UsersFetchingLoadingState());
+    try {
+      final result = await UsersRepo.searchUsers(event.searchQuery);
+      emit(UsersSearchState(filteredUsers: result.users));
+    } catch (e) {
+      emit(UsersFetchingErrorState());
     }
-
-    final filteredUsers = allUsers.where((user) {
-      final fullName = '${user.firstName} ${user.lastName}'.toLowerCase();
-      return fullName.contains(query) ||
-          user.email.toLowerCase().contains(query);
-    }).toList();
-
-    emit(UsersSearchState(filteredUsers: filteredUsers));
   }
 
   FutureOr<void> usersClearSearchEvent(
