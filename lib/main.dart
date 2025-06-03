@@ -1,5 +1,6 @@
+import 'package:bloc_assignment/features/home/home_page.dart';
+import 'package:bloc_assignment/features/posts/bloc/posts_bloc.dart';
 import 'package:bloc_assignment/features/theme/bloc/theme_bloc.dart';
-import 'package:bloc_assignment/features/users/ui/users_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -50,11 +51,10 @@ class MyApp extends StatelessWidget {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
-        primary: Colors.blue[300]!,
-        secondary: Colors.blueAccent[100]!,
-        surface: Colors.grey[900]!,
-        background: Colors.black,
-      ),
+          primary: Colors.blue[300]!,
+          secondary: Colors.blueAccent[100]!,
+          surface: Colors.grey[900]!,
+          surfaceDim: Color(0xFF111111)),
       cardTheme: CardTheme(
         color: Colors.grey[850],
         elevation: 2,
@@ -73,8 +73,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ThemeBloc(prefs: prefs)..add(InitializeTheme()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => ThemeBloc(prefs: prefs)..add(InitializeTheme()),
+        ),
+        BlocProvider(
+          create: (context) => PostsBloc(),
+        ),
+      ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           return MaterialApp(
@@ -82,7 +89,7 @@ class MyApp extends StatelessWidget {
             theme: _getLightTheme(),
             darkTheme: _getDarkTheme(),
             themeMode: state.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const UsersPage(),
+            home: HomePage(),
           );
         },
       ),
