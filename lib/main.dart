@@ -85,6 +85,7 @@ class MyApp extends StatelessWidget {
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
           return MaterialApp(
+            debugShowCheckedModeBanner: false,
             title: 'Bloc Assignment',
             theme: _getLightTheme(),
             darkTheme: _getDarkTheme(),
