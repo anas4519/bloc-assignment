@@ -223,31 +223,44 @@ class _UsersPageState extends State<UsersPage> {
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: users.length + 1,
-      itemBuilder: (context, index) {
-        if (index == users.length) {
-          if (state is UsersFetchingSuccessfulState) {
-            final successState = state;
-            if (successState.hasReachedMax) {
-              return Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: Text(
-                    'No more users to load',
-                    style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withOpacity(0.6),
-                      fontSize: 14,
+    return RefreshIndicator(
+      onRefresh: () async {
+        usersBloc.add(UsersInitialFetch());
+        await Future.delayed(const Duration(milliseconds: 1500));
+      },
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        itemCount: users.length + 1,
+        itemBuilder: (context, index) {
+          if (index == users.length) {
+            if (state is UsersFetchingSuccessfulState) {
+              final successState = state;
+              if (successState.hasReachedMax) {
+                return Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: Text(
+                      'No more users to load',
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }
-            if (successState.isLoadingMore) {
+                );
+              }
+              if (successState.isLoadingMore) {
+                return const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                );
+              }
+              usersBloc.add(UsersLoadMore());
               return const Padding(
                 padding: EdgeInsets.all(16),
                 child: Center(
@@ -255,117 +268,112 @@ class _UsersPageState extends State<UsersPage> {
                 ),
               );
             }
-            usersBloc.add(UsersLoadMore());
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
-            );
+            return const SizedBox();
           }
-          return const SizedBox();
-        }
 
-        final user = users[index];
-        String fullName = '${user.firstName} ${user.lastName}';
+          final user = users[index];
+          String fullName = '${user.firstName} ${user.lastName}';
 
-        return Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceDim,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 8,
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceDim,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context).shadowColor.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            title: Text(
-              fullName,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: Theme.of(context).colorScheme.onSurface,
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
               ),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4),
-              child: Text(
-                user.email,
+              title: Text(
+                fullName,
                 style: TextStyle(
-                  color:
-                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-            ),
-            leading: Container(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Theme.of(context).shadowColor.withOpacity(0.2),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: CircleAvatar(
-                radius: 24,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                child: ClipOval(
-                  child: CachedNetworkImage(
-                    imageUrl: user.image,
-                    width: 48,
-                    height: 48,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      width: 48,
-                      height: 48,
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      child: Icon(
-                        Icons.person_rounded,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        size: 24,
-                      ),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      width: 48,
-                      height: 48,
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      child: Icon(
-                        Icons.person_rounded,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        size: 24,
-                      ),
-                    ),
+              subtitle: Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  user.email,
+                  style: TextStyle(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.7),
+                    fontSize: 14,
                   ),
                 ),
               ),
-            ),
-            trailing: Icon(
-              Icons.chevron_right_rounded,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-              size: 20,
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => UserDetails(user: user),
+              leading: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor.withOpacity(0.2),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-              );
-            },
-          ),
-        );
-      },
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                  child: ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: user.image,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        width: 48,
+                        height: 48,
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          size: 24,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 48,
+                        height: 48,
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        child: Icon(
+                          Icons.person_rounded,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                size: 20,
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UserDetails(user: user),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }
